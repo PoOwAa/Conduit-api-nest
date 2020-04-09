@@ -2,7 +2,7 @@ import { Provider } from '@nestjs/common';
 import { Sequelize } from 'sequelize-typescript';
 import { AppConfigService } from '../config/app/appConfig.service';
 import { MysqlConfigService } from '../config/database/mysql/mysqlConfig.service';
-import { User } from '../user/user.entity';
+import { UserEntity } from '../user/user.entity';
 
 export const databaseProviders: Provider[] = [
   {
@@ -27,7 +27,7 @@ export const databaseProviders: Provider[] = [
         logging: appConfig.env === 'development' ? console.log : false,
       });
 
-      sequelize.addModels([User]);
+      sequelize.addModels([UserEntity]);
       await sequelize.sync();
       return sequelize;
     },

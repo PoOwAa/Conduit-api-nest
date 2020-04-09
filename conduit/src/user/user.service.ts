@@ -10,40 +10,47 @@ import { AuthService } from '../auth/auth.service';
 import { dbRepositories } from '../database/database.constants';
 import { CreateUserDto } from './dto/create.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
-import { User } from './user.entity';
+import { User } from './dto/user.dto';
+import { UserEntity } from './user.entity';
 
 @Injectable()
 export class UserService {
   private readonly loggerService: Logger = new Logger(UserService.name);
 
   constructor(
-    @Inject(dbRepositories.userRepository) private userRepository: typeof User,
+    @Inject(dbRepositories.userRepository)
+    private userRepository: typeof UserEntity,
     @Inject(forwardRef(() => AuthService))
     private readonly authService: AuthService,
   ) {}
 
   async findAll(): Promise<User[]> {
-    return this.userRepository.findAll<User>();
+    const users = await this.userRepository.findAll<UserEntity>();
+    return users ? users.map(u => new User(u)) : users;
   }
 
   async findOne(...args): Promise<User> {
-    return this.userRepository.findOne<User>(...args);
+    const user = await this.userRepository.findOne<UserEntity>(...args);
+    return user ? new User(user) : user;
   }
 
   async findByPk(id: number): Promise<User> {
-    return this.userRepository.findByPk<User>(id);
+    const user = await this.userRepository.findByPk<UserEntity>(id);
+    return user ? new User(user) : user;
   }
 
   async findOneByUsername(username: string): Promise<User> {
-    return this.userRepository.findOne<User>({
+    const user = await this.userRepository.findOne<UserEntity>({
       where: {
         username,
       },
     });
+
+    return user ? new User(user) : user;
   }
 
   async create(regData: CreateUserDto): Promise<LoginResponseDto> {
-    const user = this.userRepository.findOne<User>({
+    const user = await this.userRepository.findOne<UserEntity>({
       where: {
         [Op.or]: [{ username: regData.username }, { email: regData.email }],
       },
@@ -53,7 +60,7 @@ export class UserService {
       throw new BadRequestException(`User already exists!`);
     }
 
-    const newUser = new User({
+    const newUser = new UserEntity({
       username: regData.username,
       email: regData.email,
       password: regData.password,
@@ -67,5 +74,23 @@ export class UserService {
     }
 
     return this.authService.login(newUser);
+  }
+
+  async update(id: number, updatedUser: Partial<User>): Promise<User> {
+    const userEntity = await this.userRepository.findByPk<UserEntity>(id);
+    for (const prop in updatedUser) {
+      if (updatedUser.hasOwnProperty(prop)) {
+        userEntity[prop] = updatedUser[prop];
+      }
+    }
+
+    if (updatedUser.password) {
+      await userEntity.setPassword(updatedUser.password);
+    }
+
+    await userEntity.save();
+    const user = new User(userEntity);
+    delete user.password;
+    return user;
   }
 }

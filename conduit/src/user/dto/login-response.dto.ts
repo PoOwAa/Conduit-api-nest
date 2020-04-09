@@ -1,14 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { User } from './user.dto';
 
-export class LoginResponseDto {
-  @ApiProperty()
-  email: string;
+export class LoginResponseDto extends User {
   @ApiProperty()
   token: string;
-  @ApiProperty()
-  username: string;
-  @ApiProperty()
-  bio: string;
-  @ApiProperty()
-  image: string;
 }

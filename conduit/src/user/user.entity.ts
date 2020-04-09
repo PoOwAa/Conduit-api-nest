@@ -3,7 +3,6 @@ import {
   AllowNull,
   AutoIncrement,
   BeforeCreate,
-  BeforeUpdate,
   Column,
   DataType,
   IsEmail,
@@ -16,7 +15,7 @@ import {
   tableName: 'user',
   timestamps: true,
 })
-export class User extends Model<User> {
+export class UserEntity extends Model<UserEntity> {
   @PrimaryKey
   @AutoIncrement
   @Column
@@ -44,8 +43,11 @@ export class User extends Model<User> {
   image: string;
 
   @BeforeCreate
-  @BeforeUpdate
-  static async hashPassword(instance: User) {
+  static async hashPassword(instance: UserEntity) {
     instance.password = await argon2.hash(instance.password);
+  }
+
+  async setPassword(password: string) {
+    this.password = await argon2.hash(password);
   }
 }

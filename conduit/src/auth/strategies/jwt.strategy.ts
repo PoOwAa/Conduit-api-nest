@@ -1,11 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { AppConfigService } from '../../config/app/appConfig.service';
+import { AuthMeta } from '../interface/authMeta.interface';
 import { JwtPayload } from '../interface/jwtPayload.interface';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
+  private logger: Logger = new Logger(JwtStrategy.name);
+
   constructor(appConfig: AppConfigService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderWithScheme('Token'),
@@ -15,7 +18,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: JwtPayload) {
+  async validate(payload: JwtPayload): Promise<AuthMeta> {
     return {
       userId: payload.sub,
       username: payload.username,
