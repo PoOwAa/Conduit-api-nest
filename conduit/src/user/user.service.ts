@@ -24,6 +24,10 @@ export class UserService {
     private readonly authService: AuthService,
   ) {}
 
+  async find(...args): Promise<UserEntity | null> {
+    return this.userRepository.findOne<UserEntity>(...args);
+  }
+
   async findAll(): Promise<User[]> {
     const users = await this.userRepository.findAll<UserEntity>();
     return users ? users.map(u => new User(u)) : users;
