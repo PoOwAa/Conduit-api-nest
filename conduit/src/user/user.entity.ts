@@ -5,12 +5,14 @@ import {
   BeforeCreate,
   Column,
   DataType,
+  HasMany,
   IsEmail,
   Model,
   PrimaryKey,
   Table,
   Unique,
 } from 'sequelize-typescript';
+import { FollowingEntity } from 'src/profile/following.entity';
 @Table({
   tableName: 'user',
   timestamps: true,
@@ -41,6 +43,9 @@ export class UserEntity extends Model<UserEntity> {
 
   @Column
   image: string;
+
+  @HasMany(() => FollowingEntity)
+  following?: FollowingEntity[];
 
   @BeforeCreate
   static async hashPassword(instance: UserEntity) {

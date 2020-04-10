@@ -29,17 +29,17 @@ export class UserService {
     return users ? users.map(u => new User(u)) : users;
   }
 
-  async findOne(...args): Promise<User> {
+  async findOne(...args): Promise<User | null> {
     const user = await this.userRepository.findOne<UserEntity>(...args);
     return user ? new User(user) : user;
   }
 
-  async findByPk(id: number): Promise<User> {
+  async findByPk(id: number): Promise<User | null> {
     const user = await this.userRepository.findByPk<UserEntity>(id);
     return user ? new User(user) : user;
   }
 
-  async findOneByUsername(username: string): Promise<User> {
+  async findOneByUsername(username: string): Promise<User | null> {
     const user = await this.userRepository.findOne<UserEntity>({
       where: {
         username,
@@ -76,7 +76,7 @@ export class UserService {
     return this.authService.login(newUser);
   }
 
-  async update(id: number, updatedUser: Partial<User>): Promise<User> {
+  async update(id: number, updatedUser: Partial<User>): Promise<User | null> {
     const userEntity = await this.userRepository.findByPk<UserEntity>(id);
     for (const prop in updatedUser) {
       if (updatedUser.hasOwnProperty(prop)) {
