@@ -24,11 +24,8 @@ export class AuthService {
     });
 
     if (user) {
-      this.logger.debug(typeof user);
-      this.logger.debug(typeof user.password);
       if (await argon2.verify(user.password, credentials.password)) {
-        const result = new User(user);
-        return result;
+        return user;
       }
     }
     return null;
