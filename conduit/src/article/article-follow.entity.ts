@@ -6,20 +6,24 @@ import {
   Table,
 } from 'sequelize-typescript';
 import { UserEntity } from 'src/user/user.entity';
+import { ArticleEntity } from './article.entity';
 
 @Table({
-  tableName: 'following',
+  tableName: 'articleFollow',
   timestamps: false,
 })
-export class FollowingEntity extends Model<FollowingEntity> {
+export class ArticleFollowEntity extends Model<ArticleFollowEntity> {
   @ForeignKey(() => UserEntity)
   @Column
   userId: number;
 
-  @ForeignKey(() => UserEntity)
+  @ForeignKey(() => ArticleEntity)
   @Column
-  followingId: number;
+  articleId: number;
 
   @BelongsTo(() => UserEntity)
   user: UserEntity;
+
+  @BelongsTo(() => ArticleEntity)
+  article: ArticleEntity;
 }

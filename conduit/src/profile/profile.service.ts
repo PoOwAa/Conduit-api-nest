@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
 import { Profile } from './dto/profile.dto';
-import { FollowingEntity } from './following.entity';
+import { UserFollowEntity } from './user-follow.entity';
 
 @Injectable()
 export class ProfileService {
@@ -28,7 +28,7 @@ export class ProfileService {
     }
 
     const user = await this.userService.findOne({
-      include: [FollowingEntity],
+      include: [UserFollowEntity],
       where: {
         id: userId,
       },
@@ -42,7 +42,7 @@ export class ProfileService {
     return false;
   }
 
-  async changeFollow(userId: number, username: string) {
+  async followUser(userId: number, username: string) {
     const followingUser = await this.userService.findOne({
       where: {
         username,
@@ -54,24 +54,43 @@ export class ProfileService {
     }
 
     if (await this.isFollowing(userId, followingUser.id)) {
+      return true;
+    }
+
+    const following: UserFollowEntity = new UserFollowEntity({
+      userId,
+      followingId: followingUser.id,
+    });
+
+    await following.save();
+
+    return true;
+  }
+
+  async unFollowUser(userId: number, username: string) {
+    const followingUser = await this.userService.findOne({
+      where: {
+        username,
+      },
+    });
+
+    if (userId === followingUser.id) {
+      return true;
+    }
+
+    if (!(await this.isFollowing(userId, followingUser.id))) {
       const me = await this.userService.find({
-        include: [FollowingEntity],
+        include: [UserFollowEntity],
         where: {
           id: userId,
         },
       });
+
       for (const following of me.following) {
         if (followingUser.id === following.followingId) {
           await following.destroy();
         }
       }
-    } else {
-      const following: FollowingEntity = new FollowingEntity({
-        userId,
-        followingId: followingUser.id,
-      });
-
-      await following.save();
     }
 
     return true;

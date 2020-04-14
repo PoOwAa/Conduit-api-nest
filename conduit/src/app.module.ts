@@ -4,8 +4,9 @@ import { AppConfigModule } from './config/app/appConfig.module';
 import { MysqlConfigModule } from './config/database/mysql/mysqlConfig.module';
 import { UserModule } from './user/user.module';
 import { ProfileModule } from './profile/profile.module';
+import { ArticleModule } from './article/article.module';
 
 @Module({
-  imports: [AppConfigModule, MysqlConfigModule, UserModule, AuthModule, ProfileModule],
+  imports: [AppConfigModule, MysqlConfigModule, UserModule, AuthModule, ProfileModule, ArticleModule],
 })
 export class AppModule {}

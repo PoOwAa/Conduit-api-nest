@@ -1,24 +1,27 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { FollowingEntity } from 'src/profile/following.entity';
+import { UserFollowEntity } from 'src/profile/user-follow.entity';
 import { UserEntity } from '../user.entity';
 
 export class User {
-  @ApiProperty()
   id?: number;
+
   @ApiProperty()
   username: string;
-  @ApiProperty()
+
   password?: string;
+
   @ApiProperty()
   email: string;
+
   @ApiProperty()
   bio: string;
+
   @ApiProperty()
   image: string;
-  @ApiProperty()
-  following?: FollowingEntity[];
 
-  constructor(user: Partial<UserEntity>) {
+  following?: UserFollowEntity[];
+
+  constructor(user: UserEntity) {
     this.id = user?.id;
     this.username = user?.username;
     this.password = user?.password;
