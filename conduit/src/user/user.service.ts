@@ -9,7 +9,6 @@ import { Op } from 'sequelize';
 import { AuthService } from '../auth/auth.service';
 import { dbRepositories } from '../database/database.constants';
 import { CreateUserDto } from './dto/create.dto';
-import { LoginDto } from './dto/login.dto';
 import { User } from './dto/user.dto';
 import { UserEntity } from './user.entity';
 
@@ -53,7 +52,7 @@ export class UserService {
     return user ? new User(user) : user;
   }
 
-  async create(regData: CreateUserDto): Promise<LoginDto> {
+  async create(regData: CreateUserDto): Promise<User> {
     const user = await this.userRepository.findOne<UserEntity>({
       where: {
         [Op.or]: [{ username: regData.username }, { email: regData.email }],

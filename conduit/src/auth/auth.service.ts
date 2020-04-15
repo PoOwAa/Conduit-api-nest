@@ -1,6 +1,5 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import * as argon2 from 'argon2';
-import { LoginDto } from 'src/user/dto/login.dto';
 import { User } from 'src/user/dto/user.dto';
 import { LoginRequestDto } from '../user/dto/login-request.dto';
 import { UserService } from '../user/user.service';
@@ -31,10 +30,10 @@ export class AuthService {
     return null;
   }
 
-  async login(user: User): Promise<LoginDto> {
-    const token = await this.jwtService.createToken(user);
+  async login(user: User): Promise<User> {
+    const token = this.jwtService.createToken(user);
 
-    const res: LoginDto = {
+    const res: User = {
       email: user.email,
       token,
       username: user.username,

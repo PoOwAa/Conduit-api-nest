@@ -11,7 +11,7 @@ export class JWTService {
     JWTService.jwtService = this;
   }
 
-  async createToken(user: User) {
+  createToken(user: User) {
     const payload: JwtPayload = {
       sub: user.id,
       email: user.email,

@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, HttpStatus, Logger, NotFoundException, Param, Post, Query } from '@nestjs/common';
+import { Controller, Delete, Get, HttpCode, HttpStatus, Logger, NotFoundException, Param, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthMeta } from 'src/auth/interface/authMeta.interface';
 import { ErrorDto } from 'src/shared/error/error.dto';
@@ -31,7 +31,7 @@ export class ProfileController {
   @Get(':username')
   async getProfile(
     @UserMeta() me: AuthMeta,
-    @Query('username') username: string,
+    @Param('username') username: string,
   ): Promise<ProfileResponseDto> {
     const profile = await this.profileService.getProfile(username, me?.userId);
 
@@ -51,6 +51,7 @@ export class ProfileController {
     type: ErrorDto,
     status: HttpStatus.NOT_FOUND,
   })
+  @HttpCode(HttpStatus.OK)
   @ApiBearerAuth('Token')
   @Post(':username/follow')
   async followUser(

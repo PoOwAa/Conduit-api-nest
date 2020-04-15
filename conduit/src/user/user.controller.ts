@@ -26,7 +26,6 @@ import { AuthService } from '../auth/auth.service';
 import { UserMeta } from './decorator/user-meta.decorator';
 import { CreateUserDto } from './dto/create.dto';
 import { LoginRequestDto } from './dto/login-request.dto';
-import { LoginResponseDto } from './dto/login-response.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { User } from './dto/user.dto';
 import { UserService } from './user.service';
@@ -48,7 +47,7 @@ export class UserController {
   })
   @ApiResponse({
     status: HttpStatus.CREATED,
-    type: LoginResponseDto,
+    type: UserResponseDto,
   })
   @ApiBody({
     schema: {
@@ -74,9 +73,9 @@ export class UserController {
   })
   async registrateUser(
     @Body('user') userData: CreateUserDto,
-  ): Promise<LoginResponseDto> {
+  ): Promise<UserResponseDto> {
     const user = await this.userService.create(userData);
-    return new LoginResponseDto(user);
+    return new UserResponseDto(user);
   }
 
   @ApiOperation({
@@ -114,7 +113,7 @@ export class UserController {
   @Post('users/login')
   async login(
     @Body('user') credentials: LoginRequestDto,
-  ): Promise<LoginResponseDto> {
+  ): Promise<UserResponseDto> {
     const user = await this.authService.validateUser(credentials);
 
     if (!user) {
@@ -122,7 +121,7 @@ export class UserController {
     }
 
     const res = await this.authService.login(user);
-    return new LoginResponseDto(res);
+    return new UserResponseDto(res);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -204,12 +203,12 @@ export class UserController {
     @UserMeta() me: AuthMeta,
     @Body('user') userData: Partial<User>,
   ): Promise<UserResponseDto> {
-    const res = await this.userService.update(me.userId, userData);
+    const user = await this.userService.update(me.userId, userData);
 
-    if (!res) {
+    if (!user) {
       throw new NotFoundException();
     }
 
-    return new UserResponseDto(res);
+    return new UserResponseDto(user);
   }
 }

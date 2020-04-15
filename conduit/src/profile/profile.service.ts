@@ -10,6 +10,7 @@ export class ProfileService {
   constructor(private readonly userService: UserService) {}
 
   async getProfile(username: string, userId?: number): Promise<Profile | null> {
+    this.logger.debug(`Searching for user ${username}`);
     const user = await this.userService.findOneByUsername(username);
 
     if (user) {
