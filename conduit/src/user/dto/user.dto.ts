@@ -1,24 +1,34 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { FollowingEntity } from 'src/profile/following.entity';
+import { JWTService } from 'src/auth/jwt.service';
+import { UserFollowEntity } from 'src/profile/user-follow.entity';
 import { UserEntity } from '../user.entity';
 
 export class User {
-  @ApiProperty()
+
   id?: number;
+
   @ApiProperty()
   username: string;
-  @ApiProperty()
+
   password?: string;
+
   @ApiProperty()
   email: string;
+
   @ApiProperty()
   bio: string;
+
   @ApiProperty()
   image: string;
-  @ApiProperty()
-  following?: FollowingEntity[];
 
-  constructor(user: Partial<UserEntity>) {
+  following?: UserFollowEntity[];
+
+  @ApiProperty()
+  token?: string;
+
+  constructor(user: UserEntity) {
+    const jwtService: JWTService = JWTService.getInstance();
+
     this.id = user?.id;
     this.username = user?.username;
     this.password = user?.password;
@@ -28,5 +38,7 @@ export class User {
     if (user.following) {
       this.following = user.following;
     }
+
+    this.token = jwtService.createToken(this);
   }
 }

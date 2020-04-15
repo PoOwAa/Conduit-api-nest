@@ -1,6 +1,9 @@
 import { Provider } from '@nestjs/common';
 import { Sequelize } from 'sequelize-typescript';
-import { FollowingEntity } from 'src/profile/following.entity';
+import { ArticleFollowEntity } from 'src/article/article-follow.entity';
+import { ArticleEntity } from 'src/article/article.entity';
+import { TagEntity } from 'src/article/tag.entity';
+import { UserFollowEntity } from 'src/profile/user-follow.entity';
 import { AppConfigService } from '../config/app/appConfig.service';
 import { MysqlConfigService } from '../config/database/mysql/mysqlConfig.service';
 import { UserEntity } from '../user/user.entity';
@@ -28,7 +31,13 @@ export const databaseProviders: Provider[] = [
         logging: appConfig.env === 'development' ? console.log : false,
       });
 
-      sequelize.addModels([UserEntity, FollowingEntity]);
+      sequelize.addModels([
+        UserEntity,
+        UserFollowEntity,
+        ArticleEntity,
+        ArticleFollowEntity,
+        TagEntity,
+      ]);
       await sequelize.sync();
       return sequelize;
     },

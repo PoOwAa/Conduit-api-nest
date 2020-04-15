@@ -6,9 +6,9 @@ import {
   HttpCode,
   HttpStatus,
   Logger,
+  NotFoundException,
   Post,
   Put,
-  Req,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -19,13 +19,13 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { Request } from 'express';
 import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
 import { AuthMeta } from 'src/auth/interface/authMeta.interface';
+import { ErrorDto } from 'src/shared/error/error.dto';
 import { AuthService } from '../auth/auth.service';
+import { UserMeta } from './decorator/user-meta.decorator';
 import { CreateUserDto } from './dto/create.dto';
-import { LoginResponseDto } from './dto/login-response.dto';
-import { LoginDto } from './dto/login.dto';
+import { LoginRequestDto } from './dto/login-request.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { User } from './dto/user.dto';
 import { UserService } from './user.service';
@@ -44,6 +44,10 @@ export class UserController {
   @ApiOperation({
     summary: 'Create new user',
     description: 'Registration endpoint, to create a brand new user',
+  })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    type: UserResponseDto,
   })
   @ApiBody({
     schema: {
@@ -67,22 +71,25 @@ export class UserController {
       required: ['user'],
     },
   })
-  async registrateUser(@Body('user') userData: CreateUserDto) {
+  async registrateUser(
+    @Body('user') userData: CreateUserDto,
+  ): Promise<UserResponseDto> {
     const user = await this.userService.create(userData);
     return new UserResponseDto(user);
   }
 
   @ApiOperation({
+    summary: 'Login',
     description: 'User login via credentials',
   })
   @ApiUnauthorizedResponse({
     description: 'Wrong e-mail or password',
   })
   @ApiResponse({
-    description: 'Successful login',
-    type: LoginResponseDto,
-    status: 200,
+    status: HttpStatus.OK,
+    type: UserResponseDto,
   })
+  @HttpCode(HttpStatus.OK)
   @ApiBody({
     schema: {
       type: 'object',
@@ -104,7 +111,9 @@ export class UserController {
   })
   @HttpCode(HttpStatus.OK)
   @Post('users/login')
-  async login(@Body('user') credentials: LoginDto): Promise<UserResponseDto> {
+  async login(
+    @Body('user') credentials: LoginRequestDto,
+  ): Promise<UserResponseDto> {
     const user = await this.authService.validateUser(credentials);
 
     if (!user) {
@@ -117,14 +126,40 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('Token')
+  @ApiOperation({
+    summary: 'Get the current user',
+    description: 'Returns the logged in user data',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: UserResponseDto,
+  })
+  @ApiResponse({
+    description: 'User not found',
+    type: ErrorDto,
+    status: HttpStatus.NOT_FOUND,
+  })
   @Get('user')
-  async getCurrentUser(@Req() request: Request) {
-    const user: AuthMeta = request.user as AuthMeta;
+  async getCurrentUser(@UserMeta() me: AuthMeta): Promise<UserResponseDto> {
+    const user = await this.userService.findByPk(me.userId);
 
-    return new UserResponseDto(await this.userService.findByPk(user.userId));
+    if (!user) {
+      throw new NotFoundException();
+    }
+
+    return new UserResponseDto(user);
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary: 'Update the user',
+    description: 'Accepted fields: email, username, password, image, bio',
+  })
+  @ApiResponse({
+    description: 'User not found',
+    type: ErrorDto,
+    status: HttpStatus.NOT_FOUND,
+  })
   @ApiBearerAuth('Token')
   @ApiBody({
     schema: {
@@ -153,13 +188,27 @@ export class UserController {
       required: ['user'],
     },
   })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: UserResponseDto,
+  })
+  @ApiResponse({
+    description: 'User not found',
+    type: ErrorDto,
+    status: HttpStatus.NOT_FOUND,
+  })
+  @HttpCode(HttpStatus.OK)
   @Put('user')
   async updateUser(
-    @Req() request: Request,
+    @UserMeta() me: AuthMeta,
     @Body('user') userData: Partial<User>,
-  ) {
-    const user: AuthMeta = request.user as AuthMeta;
-    const res = await this.userService.update(user.userId, userData);
-    return new UserResponseDto(res);
+  ): Promise<UserResponseDto> {
+    const user = await this.userService.update(me.userId, userData);
+
+    if (!user) {
+      throw new NotFoundException();
+    }
+
+    return new UserResponseDto(user);
   }
 }

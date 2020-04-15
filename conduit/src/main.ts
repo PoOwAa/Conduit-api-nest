@@ -17,14 +17,16 @@ async function bootstrap() {
   // Swagger docs
   const options = new DocumentBuilder()
     .setTitle(appConfig.name)
+    .setBasePath('/api')
     .setDescription('Conduit API')
     .setVersion('1.0.0')
     .setLicense('The MIT License', 'https://opensource.org/licenses/MIT')
-    .setContact(
-      'Raymund Ács',
-      'https://github.com/PoOwAa',
-      'raycsucsu@gmail.com',
-    )
+    // .setContact(
+    //   'Raymund Ács',
+    //   'https://github.com/PoOwAa',
+    //   'raycsucsu@gmail.com',
+    // )
+    .setContact('RealWorld', 'https://realworld.io', '')
     .addBearerAuth(
       {
         type: 'apiKey',
