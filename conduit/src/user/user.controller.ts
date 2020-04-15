@@ -25,7 +25,8 @@ import { ErrorDto } from 'src/shared/error/error.dto';
 import { AuthService } from '../auth/auth.service';
 import { UserMeta } from './decorator/user-meta.decorator';
 import { CreateUserDto } from './dto/create.dto';
-import { LoginDto } from './dto/login.dto';
+import { LoginRequestDto } from './dto/login-request.dto';
+import { LoginResponseDto } from './dto/login-response.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { User } from './dto/user.dto';
 import { UserService } from './user.service';
@@ -47,7 +48,7 @@ export class UserController {
   })
   @ApiResponse({
     status: HttpStatus.CREATED,
-    type: UserResponseDto,
+    type: LoginResponseDto,
   })
   @ApiBody({
     schema: {
@@ -73,9 +74,9 @@ export class UserController {
   })
   async registrateUser(
     @Body('user') userData: CreateUserDto,
-  ): Promise<UserResponseDto> {
+  ): Promise<LoginResponseDto> {
     const user = await this.userService.create(userData);
-    return new UserResponseDto(user);
+    return new LoginResponseDto(user);
   }
 
   @ApiOperation({
@@ -111,7 +112,9 @@ export class UserController {
   })
   @HttpCode(HttpStatus.OK)
   @Post('users/login')
-  async login(@Body('user') credentials: LoginDto): Promise<UserResponseDto> {
+  async login(
+    @Body('user') credentials: LoginRequestDto,
+  ): Promise<LoginResponseDto> {
     const user = await this.authService.validateUser(credentials);
 
     if (!user) {
@@ -119,7 +122,7 @@ export class UserController {
     }
 
     const res = await this.authService.login(user);
-    return new UserResponseDto(res);
+    return new LoginResponseDto(res);
   }
 
   @UseGuards(JwtAuthGuard)

@@ -1,7 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { User } from './user.dto';
+import { LoginDto } from './login.dto';
 
-export class LoginResponseDto extends User {
+export class LoginResponseDto {
   @ApiProperty()
-  token: string;
+  user: LoginDto;
+
+  constructor(user: LoginDto) {
+    this.user = user;
+  }
 }
